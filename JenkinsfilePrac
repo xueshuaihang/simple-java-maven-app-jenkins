@@ -1,0 +1,69 @@
+pipeline {
+   agent any
+
+   environment {
+       username = 'shuaihangXue'
+       CC = """${sh(
+            returnStdout: true,
+            script: 'echo "CClang"'
+       )}
+       """
+       PWD_STATUS = """${sh(
+            returnStatus: true,
+            script: 'pwd'
+       )}
+       """
+       TEST_SECRET_TEXT = credentials('test-secret-text')
+       GITHUB_CREDENTIALS = credentials('myselfGithub')
+   }
+
+   parameters {
+       string(name: 'version', defaultValue: '1.8', description: 'for jdk version')
+   }
+
+   stages {
+      stage('Hello') {
+         steps {
+            echo 'Hello World'
+         }
+      }
+      stage('envVar') {
+          steps {
+              echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+              echo "buildTag:${env.BUILD_TAG}"
+              echo "jobName:${env.JOB_NAME}"
+              echo "buildUrl:${env.BUILD_URL}"
+              echo "workspace:${env.WORKSPACE}"
+          }
+      }
+      stage('setEnvVar') {
+          environment {
+               username = 'Jenkins'
+           }
+          steps {
+              echo "Hello ${username}"
+              echo "${env.CC}"
+              echo "${env.PWD_STATUS}"
+          }
+      }
+      stage('parameters') {
+          steps {
+              echo "jdk version is ${params.version}"
+          }
+      }
+      stage('credentials') {
+           steps{
+               echo "TEST_SECRET_TEXT:${TEST_SECRET_TEXT}"
+               echo "${GITHUB_CREDENTIALS}"
+               echo "${GITHUB_CREDENTIALS_USR}"
+               echo "${GITHUB_CREDENTIALS_PSW}"
+           }
+      }
+      stage('printenv') {
+          steps {
+              sh "printenv"
+          }
+      }
+
+   }
+}
